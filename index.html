@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PropertyScope - Premium Real Estate Listings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2C3E50;
+            --secondary-color: #8B7355;
+            --neutral-color: #FEFEFE;
+            --accent-color: #7A8471;
+            --text-dark: #2C3E50;
+            --text-light: #6B7280;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--neutral-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.1) 0%, rgba(139, 115, 85, 0.05) 100%);
+        }
+        
+        .property-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .property-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .filter-button {
+            transition: all 0.2s ease;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+        }
+        
+        .filter-button:hover, .filter-button.active {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+        
+        .search-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .search-input:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--secondary-color);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--secondary-color);
+            transition: width 0.2s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .price-badge {
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            color: white;
+        }
+        
+        .stats-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 115, 85, 0.1);
+        }
+        
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .reveal-element.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">PropertyScope</h1>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="nav-link text-gray-700 hover:text-gray-900">Home</a>
+                    <a href="search.html" class="nav-link text-gray-700 hover:text-gray-900">Search</a>
+                    <a href="#properties" class="nav-link text-gray-700 hover:text-gray-900">Properties</a>
+                    <a href="#about" class="nav-link text-gray-700 hover:text-gray-900">About</a>
+                    <a href="#contact" class="nav-link text-gray-700 hover:text-gray-900">Contact</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-700 hover:text-gray-900">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </button>
+                    <button class="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        Sign In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center hero-gradient" style="background-image: url('resources/hero-main.jpg'); background-size: cover; background-position: center;">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
+            <h1 class="text-5xl lg:text-7xl font-bold text-white mb-6 reveal-element">
+                Find Your
+                <span class="text-yellow-300">Dream Home</span>
+            </h1>
+            <p class="text-xl lg:text-2xl text-white/90 mb-12 reveal-element">
+                Discover premium properties with our advanced search platform
+            </p>
+            
+            <!-- Search Form -->
+            <div class="bg-white/95 backdrop-blur-md rounded-2xl p-8 shadow-2xl reveal-element">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="md:col-span-2">
+                        <input type="text" placeholder="Enter location, address, or ZIP code" 
+                               class="w-full px-4 py-3 rounded-lg search-input text-gray-700 placeholder-gray-500">
+                    </div>
+                    <div>
+                        <select class="w-full px-4 py-3 rounded-lg search-input text-gray-700">
+                            <option>Property Type</option>
+                            <option>House</option>
+                            <option>Apartment</option>
+                            <option>Condo</option>
+                            <option>Townhouse</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select class="w-full px-4 py-3 rounded-lg search-input text-gray-700">
+                            <option>Price Range</option>
+                            <option>$100k - $300k</option>
+                            <option>$300k - $500k</option>
+                            <option>$500k - $1M</option>
+                            <option>$1M+</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button class="flex-1 bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
+                        Search Properties
+                    </button>
+                    <button class="px-8 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                        Advanced Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Filters -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Browse by Category</h2>
+                <p class="text-gray-600 text-lg">Find properties that match your lifestyle</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <button class="filter-button px-6 py-3 rounded-lg font-medium text-center">
+                    <div class="text-2xl mb-2">🏠</div>
+                    Houses
+                </button>
+                <button class="filter-button px-6 py-3 rounded-lg font-medium text-center">
+                    <div class="text-2xl mb-2">🏢</div>
+                    Apartments
+                </button>
+                <button class="filter-button px-6 py-3 rounded-lg font-medium text-center">
+                    <div class="text-2xl mb-2">🏙️</div>
+                    Condos
+                </button>
+                <button class="filter-button px-6 py-3 rounded-lg font-medium text-center">
+                    <div class="text-2xl mb-2">🏘️</div>
+                    Townhouses
+                </button>
+                <button class="filter-button px-6 py-3 rounded-lg font-medium text-center">
+                    <div class="text-2xl mb-2">🏖️</div>
+                    Waterfront
+                </button>
+                <button class="filter-button px-6 py-3 rounded-lg font-medium text-center">
+                    <div class="text-2xl mb-2">🏔️</div>
+                    Mountain
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Properties -->
+    <section id="properties" class="py-20">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Featured Properties</h2>
+                <p class="text-gray-600 text-lg">Handpicked premium listings from our exclusive collection</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="properties-grid">
+                <!-- Property Card 1 -->
+                <div class="property-card rounded-2xl overflow-hidden shadow-lg reveal-element">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/philkeandesigns.com/c60f15dfaf579b0310bb9b28f139b044353b63e1.jpg" 
+                             alt="Modern Luxury House" class="w-full h-64 object-cover">
+                        <div class="absolute top-4 left-4 price-badge px-3 py-1 rounded-full text-sm font-semibold">
+                            $2,450,000
+                        </div>
+                        <button class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="text-gray-600 text-sm">Beverly Hills, CA</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Modern Luxury Estate</h3>
+                        <p class="text-gray-600 mb-4">Contemporary 5-bedroom home with stunning city views</p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>5 Beds</span>
+                            <span>4 Baths</span>
+                            <span>4,200 sq ft</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Property Card 2 -->
+                <div class="property-card rounded-2xl overflow-hidden shadow-lg reveal-element">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/cdn.homedit.com/e72834163d81e2483a1f96fac20fc83f74790a58.jpg" 
+                             alt="Modern Townhouse" class="w-full h-64 object-cover">
+                        <div class="absolute top-4 left-4 price-badge px-3 py-1 rounded-full text-sm font-semibold">
+                            $1,850,000
+                        </div>
+                        <button class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="text-gray-600 text-sm">Manhattan, NY</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Urban Townhouse</h3>
+                        <p class="text-gray-600 mb-4">Sophisticated 3-bedroom townhouse in prime location</p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>3 Beds</span>
+                            <span>3 Baths</span>
+                            <span>2,800 sq ft</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Property Card 3 -->
+                <div class="property-card rounded-2xl overflow-hidden shadow-lg reveal-element">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/cloudfront.wheretostay.com/6179acbd53f13a245e5287588731c26664aee442.jpg" 
+                             alt="Beachfront Villa" class="w-full h-64 object-cover">
+                        <div class="absolute top-4 left-4 price-badge px-3 py-1 rounded-full text-sm font-semibold">
+                            $3,200,000
+                        </div>
+                        <button class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="text-gray-600 text-sm">Malibu, CA</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Beachfront Villa</h3>
+                        <p class="text-gray-600 mb-4">Stunning oceanfront property with private beach access</p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>4 Beds</span>
+                            <span>5 Baths</span>
+                            <span>3,600 sq ft</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Property Card 4 -->
+                <div class="property-card rounded-2xl overflow-hidden shadow-lg reveal-element">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/i.lmpm.com/1a55532363174472b78edfe1cf31f4283c4bd51b.jpg" 
+                             alt="Mountain Cabin" class="w-full h-64 object-cover">
+                        <div class="absolute top-4 left-4 price-badge px-3 py-1 rounded-full text-sm font-semibold">
+                            $950,000
+                        </div>
+                        <button class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="text-gray-600 text-sm">Aspen, CO</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Mountain Retreat</h3>
+                        <p class="text-gray-600 mb-4">Cozy cabin with breathtaking mountain views</p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>3 Beds</span>
+                            <span>2 Baths</span>
+                            <span>2,400 sq ft</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Property Card 5 -->
+                <div class="property-card rounded-2xl overflow-hidden shadow-lg reveal-element">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/thumbs.dreamstime.com/ccc8c32913e0954cfd72f9997ad50f05b1bac9d0.jpg" 
+                             alt="Industrial Loft" class="w-full h-64 object-cover">
+                        <div class="absolute top-4 left-4 price-badge px-3 py-1 rounded-full text-sm font-semibold">
+                            $1,200,000
+                        </div>
+                        <button class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="text-gray-600 text-sm">Brooklyn, NY</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Industrial Loft</h3>
+                        <p class="text-gray-600 mb-4">Converted warehouse with exposed brick and high ceilings</p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>2 Beds</span>
+                            <span>2 Baths</span>
+                            <span>1,800 sq ft</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Property Card 6 -->
+                <div class="property-card rounded-2xl overflow-hidden shadow-lg reveal-element">
+                    <div class="relative">
+                        <img src="https://kimi-web-img.moonshot.cn/img/img.freepik.com/3f023b659e9cd6cceffac52cdaa6e81fb874bf95.jpg" 
+                             alt="Luxury Estate" class="w-full h-64 object-cover">
+                        <div class="absolute top-4 left-4 price-badge px-3 py-1 rounded-full text-sm font-semibold">
+                            $4,100,000
+                        </div>
+                        <button class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="text-gray-600 text-sm">Miami, FL</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Waterfront Mansion</h3>
+                        <p class="text-gray-600 mb-4">Spectacular estate with private dock and infinity pool</p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>6 Beds</span>
+                            <span>7 Baths</span>
+                            <span>7,200 sq ft</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-12">
+                <button class="bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
+                    View All Properties
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market Statistics -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Market Insights</h2>
+                <p class="text-gray-600 text-lg">Stay informed with the latest market trends</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                <div class="stats-card rounded-2xl p-8 text-center reveal-element">
+                    <div class="text-3xl font-bold text-gray-900 mb-2">$542K</div>
+                    <div class="text-gray-600">Median Home Price</div>
+                    <div class="text-green-600 text-sm mt-2">↑ 8.2% YoY</div>
+                </div>
+                <div class="stats-card rounded-2xl p-8 text-center reveal-element">
+                    <div class="text-3xl font-bold text-gray-900 mb-2">23</div>
+                    <div class="text-gray-600">Days on Market</div>
+                    <div class="text-red-600 text-sm mt-2">↓ 12% YoY</div>
+                </div>
+                <div class="stats-card rounded-2xl p-8 text-center reveal-element">
+                    <div class="text-3xl font-bold text-gray-900 mb-2">1,247</div>
+                    <div class="text-gray-600">Active Listings</div>
+                    <div class="text-green-600 text-sm mt-2">↑ 15% YoY</div>
+                </div>
+                <div class="stats-card rounded-2xl p-8 text-center reveal-element">
+                    <div class="text-3xl font-bold text-gray-900 mb-2">94%</div>
+                    <div class="text-gray-600">Sale-to-List Ratio</div>
+                    <div class="text-green-600 text-sm mt-2">↑ 2% YoY</div>
+                </div>
+            </div>
+
+            <!-- Market Trend Chart -->
+            <div class="stats-card rounded-2xl p-8 reveal-element">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Price Trends</h3>
+                <div id="price-chart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">PropertyScope</h3>
+                    <p class="text-gray-400 mb-4">Your trusted partner in finding the perfect home.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Buy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Sell</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Rent</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Agents</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Market Reports</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Mortgage Calculator</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Neighborhood Guide</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>123 Real Estate Ave</li>
+                        <li>New York, NY 10001</li>
+                        <li>Phone: (555) 123-4567</li>
+                        <li>Email: info@propertyscope.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 PropertyScope. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
